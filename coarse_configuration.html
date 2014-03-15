@@ -18,7 +18,7 @@ var processForm = function(e) {
   }
 
   var form = e.srcElement;
-  var config = {language: parseInt(form.language.value, 0)};
+  var config = {language: parseInt(form.language.value, 10)};
   var response = encodeURIComponent(JSON.stringify(config));
 
   window.location.href = 'pebblejs://close#' + response;
