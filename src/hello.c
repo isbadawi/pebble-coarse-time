@@ -1,22 +1,57 @@
 #include <pebble.h>
 
+typedef enum {
+  CONFIG_KEY_LANGUAGE,
+  NUM_CONFIG_KEYS
+} config_key_t;
+
+typedef enum {
+  LANGUAGE_ENGLISH,
+  LANGUAGE_FRENCH,
+  NUM_LANGUAGES
+} language_t;
+
+typedef enum {
+  PERIOD_NIGHT,
+  PERIOD_MORNING,
+  PERIOD_AFTERNOON,
+  PERIOD_EVENING,
+  NUM_PERIODS
+} period_t;
+
 static Window *window;
 static TextLayer *text_layer;
 
-static char* get_time_label(int hour) {
+static const char* TIME_LABELS[NUM_LANGUAGES][NUM_PERIODS] = {
+  // English
+  { "Night", "Morning", "Afternoon", "Evening" },
+  // French
+  { "Nuit", "Matin", "Apres-midi", "Soir" },
+};
+
+static const char* get_time_label(int hour, language_t language) {
+
   if (21 <= hour || hour <= 4) {
-    return "Night";
+    return TIME_LABELS[language][PERIOD_NIGHT];
   }
   if (5 <= hour && hour <= 11) {
-    return "Morning";
+    return TIME_LABELS[language][PERIOD_MORNING];
   }
   if (12 <= hour && hour <= 16) {
-    return "Afternoon";
+    return TIME_LABELS[language][PERIOD_AFTERNOON];
   }
   if (17 <= hour && hour <= 20) {
-    return "Evening";
+    return TIME_LABELS[language][PERIOD_EVENING];
   }
   return NULL;
+}
+
+static void update_time(struct tm* time) {
+  text_layer_set_text(text_layer, get_time_label(time->tm_hour, LANGUAGE_ENGLISH));
+}
+
+static void handle_hour_tick(struct tm *tick_time, TimeUnits units_changed) {
+  update_time(tick_time);
 }
 
 static TextLayer *create_time_layer(GRect bounds) {
@@ -30,14 +65,6 @@ static TextLayer *create_time_layer(GRect bounds) {
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
   return text_layer;
 };
-
-static void update_time(struct tm* time) {
-  text_layer_set_text(text_layer, get_time_label(time->tm_hour));
-}
-
-static void handle_hour_tick(struct tm *tick_time, TimeUnits units_changed) {
-  update_time(tick_time);
-}
 
 static void init(void) {
   window = window_create();
