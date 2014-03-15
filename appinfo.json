@@ -1,0 +1,17 @@
+{
+  "uuid": "c66ba4ef-9791-4010-8f13-5f25dde8f427",
+  "shortName": "Coarse",
+  "longName": "Coarse Time",
+  "companyName": "Ismail Badawi",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
