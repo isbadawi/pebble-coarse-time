@@ -100,7 +100,7 @@ static TextLayer *create_time_layer(GRect bounds) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   text_layer_set_background_color(text_layer, GColorBlack);
   text_layer_set_text_color(text_layer, GColorWhite);
-  text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
   return text_layer;
 };
 
