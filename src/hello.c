@@ -46,12 +46,50 @@ static const char* get_time_label(int hour, language_t language) {
   return NULL;
 }
 
+static language_t get_language_from_config(void) {
+  if (!persist_exists(CONFIG_KEY_LANGUAGE)) {
+    return LANGUAGE_ENGLISH;
+  }
+  return persist_read_int(CONFIG_KEY_LANGUAGE);
+}
+
 static void update_time(struct tm* time) {
-  text_layer_set_text(text_layer, get_time_label(time->tm_hour, LANGUAGE_ENGLISH));
+  language_t language = get_language_from_config();
+  text_layer_set_text(text_layer, get_time_label(time->tm_hour, language));
+}
+
+static void draw_current_time(void) {
+  time_t now = time(NULL);
+  struct tm *t = localtime(&now);
+  update_time(t);
 }
 
 static void handle_hour_tick(struct tm *tick_time, TimeUnits units_changed) {
   update_time(tick_time);
+}
+
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "App message received.");
+  Tuple *config_language_tuple = dict_find(iter, CONFIG_KEY_LANGUAGE);
+
+  if (config_language_tuple) {
+    uint32_t language = config_language_tuple->value->int32;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Config language received: %lu", language);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "About to persist!");
+    persist_write_int(CONFIG_KEY_LANGUAGE, language);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Going to refresh screen!");
+    draw_current_time();
+  }
+}
+
+static void in_dropped_handler(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "App message dropped! Error code: %d", reason);
+}
+
+static void app_message_init(void) {
+  app_message_register_inbox_received(in_received_handler);
+  app_message_register_inbox_dropped(in_dropped_handler);
+  app_message_open(64, 64);
 }
 
 static TextLayer *create_time_layer(GRect bounds) {
@@ -67,6 +105,7 @@ static TextLayer *create_time_layer(GRect bounds) {
 };
 
 static void init(void) {
+  app_message_init();
   window = window_create();
   window_set_background_color(window, GColorBlack);
   Layer *window_layer = window_get_root_layer(window);
@@ -74,9 +113,7 @@ static void init(void) {
   text_layer = create_time_layer(layer_get_bounds(window_layer));
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
 
-  time_t now = time(NULL);
-  struct tm *t = localtime(&now);
-  update_time(t);
+  draw_current_time();
 
   tick_timer_service_subscribe(HOUR_UNIT, handle_hour_tick);
   window_stack_push(window, true);
