@@ -3,7 +3,7 @@ Pebble.addEventListener("ready", function(e) {
 
 Pebble.addEventListener('showConfiguration', function(e) {
   console.log('About to open configuration!')
-  Pebble.openURL('http://badawi.io/pebble/coarse_configuration.html')
+  Pebble.openURL('http://badawi.io/pebble/coarse/configuration.html')
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
